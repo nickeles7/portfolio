@@ -1,6 +1,6 @@
 # Nickeles Kerkinni
 
-I build production SaaS platforms end-to-end with AI. Database schemas, payment flows, cloud infrastructure, frontend. I architect systems, direct the implementation, and ship. Most of my repos are private, so this page walks through what I've built.
+I build production SaaS platforms end-to-end with AI. Database schemas, payment flows, cloud infrastructure, frontend. I architect systems, direct the implementation, and ship.
 
 ---
 
@@ -31,9 +31,33 @@ Brands post bounties with view goals and budgets. Creators submit clips, and pay
 
 ---
 
+## MDOPS Trading System
+
+**Quantitative research + real-time copy-trading execution for Polymarket prediction markets**
+
+Two-part system: an autonomous research engine that discovers profitable trading patterns, and a real-time executor that copies validated wallet signals with full risk management.
+
+**Stack:** Python &middot; SQLite &middot; pandas &middot; scipy &middot; asyncio &middot; WebSockets &middot; Flask &middot; AWS (EC2, nginx) &middot; Polymarket CLOB API &middot; Gamma API
+
+**What I built:**
+
+- **Autonomous research loop** (`mdops-autoresearch`) that runs experiments against a 6.4M trade corpus across 500+ resolved markets. Each hypothesis is coded, executed, scored against three statistical gates (30+ observations, p < 0.05, expectancy > 2%), and kept or reverted automatically. 11,935+ experiments logged
+- **K-means behavioral clustering** on 12-dimensional wallet profiles (trade frequency, win rate, entry zones, size consistency, sell ratio, etc.) to discover trader archetypes. Temporal quintile stability testing ensures patterns survive across time periods, not just in aggregate
+- **4 confirmed production archetypes** with validated edge: Resolution Harvester (88.4% score, 97% WR), Diversified Harvester (75.2%, 86% WR), Contrarian Buyer (355% score, 72.6% WR), and Scatter Shot (247%, 65.4% WR). Each with exported wallet lists and executor configs
+- **Real-time copy-trading executor** (`mdops-poly-pipeline`) monitoring 50 profiled wallets via WebSocket with 35-120ms detection latency. Evaluates 15+ circuit breakers per signal: hard drawdown limits, max positions, daily/weekly loss caps, consecutive loss triggers, category exposure caps, and per-market concentration limits
+- **Capital framework** using quarter-Kelly sizing with 4 edge tiers, resolution time decay (full size at 7 days, 20% at 30 days, skip beyond), price-band multipliers, wallet confidence scores, and conviction detection based on trade size vs. baseline
+- **Archetype-aware sell logic.** Flippers mirror sells immediately; all others hold to resolution based on configurable trust scores. Take-profit and stop-loss rules adjust by archetype and days-to-resolution
+- **Auto-bench system** that removes wallets with 5+ consecutive losses or negative realized edge, with 24h cooldown before re-activation
+- **Live monitoring dashboard** at `dash.metabloom.io` with admin/invite auth tiers, 5-second polling, P&L curves, signal flow visualization, category exposure breakdown, and wallet scoreboard
+
+**Scale:** Running on two AWS boxes (~$20/mo) &middot; currently in dry-run (paper trading) with production-ready execution &middot; actively developed
+
+---
+
 ## OpGen AI
 
 **AI-powered blueprint-to-material-quote platform for construction**
+[backend](https://github.com/nickeles7/backend-opgen-ai-public) &middot; [frontend](https://github.com/nickeles7/opgen-ai-frontend)
 
 Upload architectural blueprints, AI analyzes them, get an itemized material quote with pricing. Designed to cut quoting time from hours to minutes for contractors and architects.
 
@@ -61,13 +85,18 @@ Upload architectural blueprints, AI analyzes them, get an itemized material quot
 
 ## MetaBloom
 
-**AI-powered Hearthstone gaming assistant, web app + Windows desktop overlay**
+**AI-powered Hearthstone gaming assistant — built three times**
+[overlay](https://github.com/nickeles7/metabloom-overlay) &middot; [chat frontend](https://github.com/nickeles7/metabloom-frontend) &middot; [website](https://github.com/nickeles7/metabloom-website)
 
-A three-part ecosystem: marketing site with payments, web-based AI chat for game strategy, and a native Windows overlay that reads game memory during Arena drafts and provides real-time AI card recommendations.
+MetaBloom went through three complete pivots, each built to near-completion before evolving into the next:
+
+1. **Phase 1: AI Match Simulator.** Forked Fireplace (Python Hearthstone engine), built custom AI agents with 5-dimensional archetype profiles (tempo, risk, prioritization, mana usage, action ordering) to generate millions of simulated games. Goal: outpace HSReplay's data collection with synthetic matches to map the meta faster
+2. **Phase 2: Standalone AI Chat.** Pivoted to a web-based ChatGPT-style interface specifically for Hearthstone strategy. Deck code generation, theory crafting, card analysis — all through conversational AI with Grok streaming and function calling
+3. **Phase 3: Arena Draft Overlay.** Final version. Native Windows overlay that reads Hearthstone's game memory during Arena drafts and displays real-time AI card recommendations on top of the game
 
 **Stack:** Next.js 15 &middot; React 19 &middot; C# / WPF / .NET 4.8 &middot; Firebase &middot; Stripe &middot; Grok API &middot; Claude AI &middot; AWS Lambda &middot; Zustand &middot; Tailwind CSS
 
-**What I built:**
+**What I built (Phase 3 — shipped version):**
 
 - **Windows desktop overlay** (C# WPF) that reads Hearthstone game memory via UnitySpy, detects Arena draft card options in real-time, and displays AI-powered recommendations as a transparent overlay on top of the game
   - Cloud-based scoring engine via AWS Lambda for card strength analysis with deck context, mana curve, and synergy detection
@@ -85,6 +114,22 @@ A three-part ecosystem: marketing site with payments, web-based AI chat for game
 
 ---
 
+## TikTok Content Automation
+
+**Automated slideshow content generation system for TikTok**
+[repo](https://github.com/nickeles7/tiktok-slideshow-automation)
+
+End-to-end system for generating "hopecore" motivational slideshow posts. Mines real posts from X/Twitter via Grok, clusters them into themes, generates hooks through differentiation matrices, and renders final slideshows with Python.
+
+**What I built:**
+
+- **Differentiation matrix system** that rotates across 4 dimensions (hook frame, story engine, viewer identity, numeric type) to prevent repetitive content. No combination repeats within a batch; no triplet repeats in last 8 posts
+- **Progressive reveal funneling** — slides 1-2 hook broad side-hustle audiences with no jargon, slide 3 introduces the concept, slides 4+ go niche
+- **Python rendering engine** (Pillow + Cairo) with TikTok-safe zone awareness (19% top, 50% bottom for UI overlays), multi-pass shadow system, scrim for bright backgrounds, and highlight colors with stroke outlines
+- **State machine workflow** for session management — routes to generation, rendering, or posting based on current state of drafts and data freshness
+
+---
+
 ## Other Work
 
 **Basimo Blends.** E-commerce site for a specialty food brand. React 18, Sanity CMS for content management, Shopify Buy SDK for checkout. 54 commits, 2025.
@@ -97,10 +142,10 @@ A three-part ecosystem: marketing site with payments, web-based AI chat for game
 
 | | Languages | Frameworks | Cloud / Infra | Data | Payments | AI/ML |
 |---|---|---|---|---|---|---|
-| | TypeScript, Python, C# | Next.js, React, Flask, WPF | AWS (S3, Lambda, ECS, SQS, EventBridge, CloudFront, SES, DynamoDB), Vercel | PostgreSQL, Prisma, Firebase/Firestore, Supabase, Upstash Redis | Stripe Connect, Stripe Billing | LangGraph, Grok Vision, OpenAI, Claude, multi-agent orchestration |
+| | TypeScript, Python, C# | Next.js, React, Flask, WPF | AWS (S3, Lambda, ECS, SQS, EventBridge, CloudFront, SES, DynamoDB, EC2), Vercel | PostgreSQL, Prisma, Firebase/Firestore, Supabase, SQLite, Upstash Redis | Stripe Connect, Stripe Billing | LangGraph, Grok Vision, OpenAI, Claude, multi-agent orchestration, k-means clustering |
 
 **How I work:** I use AI as my primary development tool. I architect the system, define the data models, make the infrastructure decisions, and direct AI through implementation. The output is production software with real users and real money moving through it. I'm strongest when the problem requires understanding how all the pieces connect and turning that into something that ships.
 
 ---
 
-*Most repositories are private. Available for code walkthrough on request.*
+*Public repos linked above. Private repos available for code walkthrough on request.*
