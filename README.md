@@ -56,61 +56,52 @@ Two-part system: an autonomous research engine that discovers profitable trading
 
 ## OpGen AI
 
-**AI-powered blueprint-to-material-quote platform for construction**
-[backend](https://github.com/nickeles7/backend-opgen-ai-public) &middot; [frontend](https://github.com/nickeles7/opgen-ai-frontend)
+**Multi-agent AI pipeline that turns construction blueprints into priced material takeoff quotes**
+[backend](https://github.com/nickeles7/backend-opgen-ai-public) &middot; [opgen.ai](https://www.opgen.ai/)
 
-Upload architectural blueprints, AI analyzes them, get an itemized material quote with pricing. Designed to cut quoting time from hours to minutes for contractors and architects.
+Contractors need material takeoffs to estimate costs and run projects. The process is manual, slow, and inconsistent. OpGen.ai automates the full pipeline end-to-end. Blueprint in, priced quote PDF out.
 
-**Stack:** React 18 &middot; Flask &middot; Python &middot; LangGraph &middot; Grok 2 Vision (xAI) &middot; OpenAI &middot; AWS (S3, Lambda, ECS Fargate, CloudWatch) &middot; Firebase Auth &middot; Mailgun &middot; WeasyPrint
+**Stack:** Python &middot; Flask &middot; LangGraph &middot; Grok 2 Vision (xAI) &middot; AWS (S3, Lambda, ECS Fargate) &middot; SerpAPI &middot; Mailgun &middot; WeasyPrint &middot; Firebase Auth
 
 **What I built:**
 
-- **Multi-agent AI pipeline** using LangGraph with 6 specialized agents:
-  - `BlueprintAnalyzerAgent` uses Grok 2 Vision to extract materials from blueprint images
-  - `ValidatorAgent` ensures structural correctness of extracted data
-  - `ApproverAgent` approves or triggers a correction loop (max 3 iterations)
-  - `PricerAgent` fetches real-time material pricing via web search APIs
-  - `PDFGeneratorAgent` produces professional PDF quotes
-  - `WorkflowRouterAgent` orchestrates decisions between agents
-- **6-step guided intake wizard** on the frontend. Blueprint upload (drag-and-drop, supports PDF/PNG/JPG/CAD), building classification, material specification, measurements, construction methods, and supporting documents
-- **Production deployment on AWS ECS Fargate** running a containerized Python backend with Gunicorn + gevent workers, 2GB memory / 1 vCPU task definition
+- **Six-stage LangGraph pipeline.** Blueprint Analyzer extracts materials via Grok 2 Vision. Validator cross-references quantities against blueprint specs. Approver accepts or denies with a reason, looping back to Validator for correction (max 3 loops). Pricer queries SerpAPI for real Home Depot pricing. Router handles conditional flow. PDF Generator renders the final quote via Jinja2 and WeasyPrint, uploads to S3
+- **Adaptive vision pipeline.** Started with OpenAI, moved to Grok 2 Vision. Low-res preview of all pages for context, then high-res per page. Adaptive DPI conversion so blueprint pages fit within Grok's token window
 - **Lambda-triggered email delivery.** S3 event triggers PDF processing, generates pre-signed download URLs, delivers via Mailgun
-- **Quote management** with view, edit, and download as PDF. Full history tracking per user in Firestore
-- **Admin panel** for invite code generation with expiry dates and user whitelist management
-- **Firebase Auth** with email/password and Google OAuth
+- **Production deployment on AWS ECS Fargate** running a containerized Python backend with Gunicorn workers
 
-**Scale:** 140 commits across frontend + backend &middot; Jun 2024 – Apr 2025
+**Scale:** Jun 2024 – Mar 2025
 
 ---
 
 ## MetaBloom
 
 **AI-powered Hearthstone gaming assistant — built three times**
-[overlay](https://github.com/nickeles7/metabloom-overlay) &middot; [chat frontend](https://github.com/nickeles7/metabloom-frontend) &middot; [website](https://github.com/nickeles7/metabloom-website)
+[overlay](https://github.com/nickeles7/metabloom-overlay) &middot; [web app](https://github.com/nickeles7/metabloom-frontend)
 
-MetaBloom went through three complete pivots, each built to near-completion before evolving into the next:
+MetaBloom went through three pivots. Phase 1 was a failed attempt that informed the direction. Phases 2 and 3 were built to completion.
 
-1. **Phase 1: AI Match Simulator.** Forked Fireplace (Python Hearthstone engine), built custom AI agents with 5-dimensional archetype profiles (tempo, risk, prioritization, mana usage, action ordering) to generate millions of simulated games. Goal: outpace HSReplay's data collection with synthetic matches to map the meta faster
-2. **Phase 2: Standalone AI Chat.** Pivoted to a web-based ChatGPT-style interface specifically for Hearthstone strategy. Deck code generation, theory crafting, card analysis — all through conversational AI with Grok streaming and function calling
-3. **Phase 3: Arena Draft Overlay.** Final version. Native Windows overlay that reads Hearthstone's game memory during Arena drafts and displays real-time AI card recommendations on top of the game
+1. **Phase 1: AI Match Simulator.** Forked Fireplace (Python Hearthstone engine) 42 times trying to get AI-vs-AI games working. Built custom AI agents with 5-dimensional archetype profiles (tempo, risk, prioritization, mana usage, action ordering). Goal: outpace HSReplay's data collection with synthetic matches. Never got stable enough to ship
+2. **Phase 2: Conversational AI System.** Not a chatbot. A routed system that turns natural language into valid Hearthstone outputs (deck codes, card queries, strategy). LLM handles interpretation, deterministic systems handle execution. Built an AST-based query compiler (QueryMaster) that translates natural language into PostgreSQL. Domain-aware ambiguity resolver with frustration tracking
+3. **Phase 3: Arena Draft Overlay.** Windows desktop overlay (C# WPF) that reads Hearthstone's game memory via UnitySpy during Arena drafts. Detects card options in under 100ms. Scores contextually via AWS Lambda. Sends 10 structured analytical matrices to Claude for recommendations. Reverse-engineered HSReplay, HearthArena, and Firestone's scoring systems to build the base scoring foundation
 
-**Stack:** Next.js 15 &middot; React 19 &middot; C# / WPF / .NET 4.8 &middot; Firebase &middot; Stripe &middot; Grok API &middot; Claude AI &middot; AWS Lambda &middot; Zustand &middot; Tailwind CSS
+**Stack:** C# / WPF / .NET 4.8 &middot; Next.js 15 &middot; React 19 &middot; TypeScript &middot; Firebase &middot; Stripe &middot; Grok API &middot; Claude AI &middot; AWS Lambda &middot; PostgreSQL &middot; Zustand &middot; Tailwind CSS
 
-**What I built (Phase 3 — shipped version):**
+**What I built (Phase 3 — overlay):**
 
-- **Windows desktop overlay** (C# WPF) that reads Hearthstone game memory via UnitySpy, detects Arena draft card options in real-time, and displays AI-powered recommendations as a transparent overlay on top of the game
-  - Cloud-based scoring engine via AWS Lambda for card strength analysis with deck context, mana curve, and synergy detection
-  - Claude AI integration for natural language card recommendations with 44+ prompt templates
-  - Hero winrate display during hero selection
-  - Deck tracking and coverage analysis overlays
-  - Re-analysis system for deeper AI evaluation on demand
-  - Multi-monitor support, DPI-aware asset rendering, draggable UI elements
-  - Event-driven architecture with EventBus pattern, MVVM, 34 services
-- **Web AI chat interface** (Next.js) with real-time conversational AI using Grok streaming, Hearthstone deck building, function calling for structured tasks, and ambiguity resolution. System prompt caching reduced token usage by 91%
-- **Landing page and payment portal** (Next.js) with subscription management ($6.99/mo), Stripe webhooks, download portal with access control, and affiliate tracking
-- **Shared infrastructure** using Firebase Auth across all three apps, Firestore for user data and token tracking, Stripe billing, and AWS Lambda for AI/scoring APIs
+- **Game memory reading** via UnitySpy/MindVision. Attaches to Hearthstone's Unity process, reads draft state, detects card options in real-time. Handles multiple arena modes (standard and underground) with different memory layouts
+- **10-matrix decision system.** Structured analytical context sent to Claude per pick: deck composition, mana curve, synergies, coverage gaps, archetype coherence, risk assessment. Which matrices get sent depends on draft phase. Early picks get different context than late picks
+- **Cloud scoring engine** via AWS Lambda. Reverse-engineered three competitor scoring systems (HSReplay, HearthArena, Firestone) to build the base foundation, then built MetaBloom's own variation
+- **Six overlay windows** managed by a central WindowManager. Multi-monitor support, z-order management relative to the game window, percentage-based positioning. Overlays appear only during card selection
+- **Event-driven architecture** with pub-sub EventBus, MVVM, 34 services, phased DI bootstrap
 
-**Scale:** 216 commits across 3 repos &middot; Feb – Sep 2025
+**What I built (Phase 2 — web app):**
+
+- **QueryMaster AST system.** Natural language goes in, an abstract syntax tree comes out (AND/OR/NOT conditions, operators like ILIKE, BETWEEN). AST compiles to SQL. SQL runs against PostgreSQL via Lambda. LLM decides what to query. System guarantees how it's executed
+- **Deterministic pre-routing.** Deck codes caught by regex at 100% confidence before the LLM sees them. Each intent type routes to a different function set
+- **Ambiguity resolver** with Hearthstone domain awareness and frustration tracking. Moved from "ask, ask, ask" to "infer, adjust, only ask when necessary"
+
+**Scale:** Mar 2025 – Feb 2026
 
 ---
 
@@ -132,9 +123,9 @@ End-to-end system for generating "hopecore" motivational slideshow posts. Mines 
 
 ## Other Work
 
-**Basimo Blends.** E-commerce site for a specialty food brand. React 18, Sanity CMS for content management, Shopify Buy SDK for checkout. 54 commits, 2025.
+**[Basimo Blends](https://github.com/nickeles7/Basimo-Blends).** E-commerce site for an organic specialty spice brand. React 18, headless Shopify for checkout, Sanity CMS for blog content. 2025.
 
-**BlokCrafters, WAX Blockchain Guild** (CEO, Sep 2021 – May 2024). Ran a blockchain infrastructure guild on the WAX network. Directed a team operating full/partial node infrastructure, API endpoints, and monitoring systems. Under the hood: Ansible-managed deployments, Python monitoring and alerting (WAXMon), Hyperion API indexing, WireGuard mesh networking, Oracle price feeds, and NFT platform services across 28 repositories. Submitted quarterly guild evaluation reports to the WAX Office of Inspector General, coordinating technical deliverables and governance compliance across a 2.5-year span.
+**BlokCrafters, WAX Blockchain Guild** (CEO, Jul 2019 – Mar 2025). Ran a blockchain infrastructure guild on the WAX network. Directed a team operating full/partial node infrastructure, API endpoints, and monitoring systems. Under the hood: Ansible-managed deployments, Python monitoring and alerting (WAXMon), Hyperion API indexing, WireGuard mesh networking, Oracle price feeds, and NFT platform services across 28 repositories. Submitted quarterly guild evaluation reports to the WAX Office of Inspector General, coordinating technical deliverables and governance compliance across a 2.5-year span.
 
 ---
 
